@@ -7,7 +7,7 @@ import (
 type SendMessageRequest struct {
 	Sender     models.User `json:"sender"`
 	ReceiverID string      `json:"receiverId"`
-	Content    string      `json:"message"`
+	Content    string      `json:"content"`
 }
 
 type GetMessageRequest struct {
