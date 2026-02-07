@@ -11,10 +11,13 @@ func RegisterRoutes(r chi.Router) {
 	tcpClient := clients.NewTcpClient()
 	udpClient := clients.NewUdpClient()
 
+	userService := services.NewUserService(tcpClient)
+	messageService := services.NewMessageService(tcpClient, udpClient)
+	authService := services.NewAuthService(tcpClient)
+
 	r.Route("/users", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)
 
-		userService := services.NewUserService(tcpClient)
 
 		r.Get("/", handlers.GetUsersHandler(userService))
 	})
@@ -22,16 +25,21 @@ func RegisterRoutes(r chi.Router) {
 	r.Route("/messages", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)
 
-		messageService := services.NewMessageService(tcpClient, udpClient)
 
 		r.Get("/", handlers.GetMessagesHandler(messageService))
 		r.Post("/", handlers.SendMessageHandler(messageService))
 	})
 
 	r.Route("/auth", func(r chi.Router) {
-		authService := services.NewAuthService(tcpClient)
 
 		r.Post("/login", handlers.LoginHandler(authService))
+	})
+
+	r.Route("/ws", func(r chi.Router) {
+		r.Use(handlers.AuthMiddleware)
+
+		r.Get("/users", handlers.UsersWSHandler(userService))
+		r.Get("/messages", handlers.MessagesWSHandler(messageService))
 	})
 
 }

@@ -20,7 +20,7 @@ func LoginHandler(svc services.AuthService) http.HandlerFunc {
 			return
 		}
 
-		token, err := svc.Login(&payload)
+		token, currentUser, err := svc.Login(&payload)
 		if err != nil {
 			http.Error(w, "Usuário inválido", http.StatusUnauthorized)
 			return
@@ -36,7 +36,9 @@ func LoginHandler(svc services.AuthService) http.HandlerFunc {
 
 		http.SetCookie(w, cookie)
 
-		w.Write([]byte("logged in"))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(currentUser)
 	}
 }
 

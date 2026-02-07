@@ -25,3 +25,13 @@ func (s *UserService) GetUsers(payload dto.UserDto) ([]dto.GetUsersResponse, err
 
 	return users, nil
 }
+
+func GetUserFromUsers(id string, users []dto.GetUsersResponse) *dto.GetUsersResponse {
+	for _, v := range users {
+		if v.ID == id {
+			return &v
+		}
+	}
+
+	return nil
+}
