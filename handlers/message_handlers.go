@@ -2,40 +2,39 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
-	"strings"
-
-	"main.go/clients"
 	"main.go/dto"
+	"main.go/services"
+	"net/http"
 )
 
-func GetMessages() http.HandlerFunc {
+func GetMessagesHandler(svc services.MessageService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var payload dto.GetMessageRequest
-
-		err := json.NewDecoder(r.Body).Decode(&payload)
-		if err != nil {
-			http.Error(w, "Mensagem inválida", http.StatusBadRequest)
+		authUser, ok := r.Context().Value("authUser").(dto.UserDto)
+		if !ok {
+			http.Error(w, "Não autorizado", http.StatusUnauthorized)
 			return
 		}
 
-		client := clients.NewTcpClient()
-		res, err := client.GetMessage(&payload)
+		response, err := svc.GetMessages(authUser)
 		if err != nil {
-			http.Error(w, "Erro ao enviar mensagem", http.StatusServiceUnavailable)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
 		}
 
-		content := strings.Split(res, ":")
-
-		response := dto.GetMessageResponse{UserID: content[0], Content: content[1]}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
 	}
 }
 
-func SendMessage() http.HandlerFunc {
+func SendMessageHandler(svc services.MessageService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		authUser, ok := r.Context().Value("authUser").(dto.UserDto)
+		if !ok {
+			http.Error(w, "Não autorizado", http.StatusUnauthorized)
+			return
+		}
+
 		var payload dto.SendMessageRequest
 
 		err := json.NewDecoder(r.Body).Decode(&payload)
@@ -44,12 +43,9 @@ func SendMessage() http.HandlerFunc {
 			return
 		}
 
-		client := clients.NewUdpClient()
+		payload.Sender = &authUser
 
-		err = client.SendMessageUDP(&payload)
-		if err != nil {
-			http.Error(w, "Erro ao enviar mensagem", http.StatusServiceUnavailable)
-		}
+		svc.SendMessage(payload)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

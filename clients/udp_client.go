@@ -2,9 +2,9 @@ package clients
 
 import (
 	"fmt"
+	"main.go/dto"
 	"net"
 	"os"
-	"main.go/dto"
 )
 
 type UdpClient struct {
@@ -21,7 +21,7 @@ func NewUdpClient() *UdpClient {
 	}
 }
 
-func (c *UdpClient) SendMessageUDP(req *dto.SendMessageRequest) error {
+func (c *UdpClient) SendMessageUDP(req dto.SendMessageRequest) error {
 	conn, err := net.Dial("udp", c.address)
 	if err != nil {
 		return err

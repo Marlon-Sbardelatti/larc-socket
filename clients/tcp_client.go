@@ -2,12 +2,14 @@ package clients
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 
 	"main.go/dto"
-	"main.go/models"
 )
 
 type TcpClient struct {
@@ -25,36 +27,66 @@ func NewTcpClient() *TcpClient {
 
 }
 
-func (c *TcpClient) GetUsers(user *models.User) (string, error) {
+func (c *TcpClient) GetUsers(payload dto.UserDto) ([]dto.GetUsersResponse, error) {
 	conn, err := net.Dial("tcp", c.address)
 	if err != nil {
-		return "", err
+		return []dto.GetUsersResponse{}, err
 	}
 	defer conn.Close()
 
-	cmd := fmt.Sprintf("GET USERS %s:%s\n", user.ID, user.Password)
+	cmd := fmt.Sprintf("GET USERS %s:%s\n", payload.ID, payload.Password)
 	_, err = conn.Write([]byte(cmd))
 	if err != nil {
-		return "", err
+		return []dto.GetUsersResponse{}, err
 	}
 
 	reader := bufio.NewReader(conn)
 	resp, err := reader.ReadString('\n')
 	if err != nil {
-		return "", err
+		return []dto.GetUsersResponse{}, err
+
 	}
 
-	return resp, nil
+	users, err := parseUsers(resp)
+	if err != nil {
+		return []dto.GetUsersResponse{}, err
+
+	}
+
+	return users, nil
 }
 
-func (c *TcpClient) GetMessage(req *dto.GetMessageRequest) (string, error) {
+func parseUsers(res string) ([]dto.GetUsersResponse, error) {
+	parts := strings.Split(res, ":")
+
+	var users []dto.GetUsersResponse
+
+	for i := 0; i < len(parts)-1; i += 3 {
+		wins, err := strconv.Atoi(parts[i+2])
+		if err != nil {
+			return nil, errors.New("Erro ao converter usuário")
+		}
+
+		user := dto.GetUsersResponse{
+			ID:       parts[i],
+			Username: parts[i+1],
+			Wins:     wins,
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (c *TcpClient) GetMessage(payload dto.UserDto) (string, error) {
 	conn, err := net.Dial("tcp", c.address)
 	if err != nil {
 		return "", err
 	}
 	defer conn.Close()
 
-	cmd := fmt.Sprintf("GET MESSAGE %s:%s\n", req.User.ID, req.User.Password)
+	cmd := fmt.Sprintf("GET MESSAGE %s:%s\n", payload.ID, payload.Password)
 	_, err = conn.Write([]byte(cmd))
 	if err != nil {
 		return "", err
