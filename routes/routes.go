@@ -18,13 +18,11 @@ func RegisterRoutes(r chi.Router) {
 	r.Route("/users", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)
 
-
 		r.Get("/", handlers.GetUsersHandler(userService))
 	})
 
 	r.Route("/messages", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)
-
 
 		r.Get("/", handlers.GetMessagesHandler(messageService))
 		r.Post("/", handlers.SendMessageHandler(messageService))
@@ -38,8 +36,7 @@ func RegisterRoutes(r chi.Router) {
 	r.Route("/ws", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)
 
-		r.Get("/users", handlers.UsersWSHandler(userService))
-		r.Get("/messages", handlers.MessagesWSHandler(messageService))
+		r.Get("/", handlers.WebSocketHandler(userService, messageService))
 	})
 
 }
