@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"main.go/clients"
@@ -18,7 +19,6 @@ func NewMessageService(tcpClient *clients.TcpClient, udpClient *clients.UdpClien
 }
 
 func (s *MessageService) GetMessages(payload dto.UserDto) (dto.GetMessageResponse, error) {
-
 	client := s.tcpClient
 	res, err := client.GetMessage(payload)
 	if err != nil {
@@ -26,10 +26,14 @@ func (s *MessageService) GetMessages(payload dto.UserDto) (dto.GetMessageRespons
 	}
 
 	content := strings.Split(res, ":")
+	id, err := strconv.Atoi(content[0])
+	if err != nil {
+		id = -1
+	}
 
 	response := dto.GetMessageResponse{
-		UserID:  content[0],
-		Content: content[1],
+		SenderID: id,
+		Content:  content[1],
 	}
 
 	return response, nil

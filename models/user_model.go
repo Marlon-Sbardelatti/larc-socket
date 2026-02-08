@@ -1,14 +1,13 @@
 package models
 
 type User struct {
-	ID       string `json:"id"`
-	Password string `json:"password"`
+	ID       int `json:"id"`
+	Password string  `json:"password"`
 }
 
-func NewUser(id, password string) *User {
+func NewUser(id int , password string) *User {
 	return &User{
 		ID:       id,
 		Password: password,
 	}
 }
-

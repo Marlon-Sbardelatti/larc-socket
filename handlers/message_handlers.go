@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"main.go/dto"
 	"main.go/services"
-	"net/http"
 )
 
 func GetMessagesHandler(svc services.MessageService) http.HandlerFunc {

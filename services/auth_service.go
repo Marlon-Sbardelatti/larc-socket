@@ -24,7 +24,7 @@ func (s *AuthService) Login(payload *dto.UserDto) (string, *dto.GetUsersResponse
 		Password: payload.Password,
 	})
 
-	// como a requisicao retorna os usuarios ativos, na primeira vez chamad ainda não estamos no resultado 
+	// como a requisicao retorna os usuarios ativos, na primeira vez chamad ainda não estamos no resultado
 	// de GetUsers, por isso chamamos duas vezes
 
 	users, err := s.client.GetUsers(dto.UserDto{
@@ -49,7 +49,7 @@ func (s *AuthService) Login(payload *dto.UserDto) (string, *dto.GetUsersResponse
 	return token, currentUser, nil
 }
 
-func generateToken(userID string, password string) (string, error) {
+func generateToken(userID int, password string) (string, error) {
 	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 	claims := jwt.MapClaims{

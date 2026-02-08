@@ -34,7 +34,7 @@ func (c *TcpClient) GetUsers(payload dto.UserDto) ([]dto.GetUsersResponse, error
 	}
 	defer conn.Close()
 
-	cmd := fmt.Sprintf("GET USERS %s:%s\n", payload.ID, payload.Password)
+	cmd := fmt.Sprintf("GET USERS %d:%s\n", payload.ID, payload.Password)
 	_, err = conn.Write([]byte(cmd))
 	if err != nil {
 		return []dto.GetUsersResponse{}, err
@@ -67,8 +67,13 @@ func parseUsers(res string) ([]dto.GetUsersResponse, error) {
 			return nil, errors.New("Erro ao converter usuário")
 		}
 
+		id, err := strconv.Atoi(parts[i])
+		if err != nil {
+			return []dto.GetUsersResponse{}, err
+		}
+
 		user := dto.GetUsersResponse{
-			ID:       parts[i],
+			ID:       id,
 			Username: parts[i+1],
 			Wins:     wins,
 		}
@@ -86,7 +91,7 @@ func (c *TcpClient) GetMessage(payload dto.UserDto) (string, error) {
 	}
 	defer conn.Close()
 
-	cmd := fmt.Sprintf("GET MESSAGE %s:%s\n", payload.ID, payload.Password)
+	cmd := fmt.Sprintf("GET MESSAGE %d:%s\n", payload.ID, payload.Password)
 	_, err = conn.Write([]byte(cmd))
 	if err != nil {
 		return "", err

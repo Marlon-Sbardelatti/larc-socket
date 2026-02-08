@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-
 	"github.com/golang-jwt/jwt/v5"
 	"main.go/dto"
 	"main.go/services"
@@ -64,11 +63,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-		userID := claims["user_id"].(string)
+		userID := claims["user_id"].(float64)
 		password := claims["password"].(string)
 
 		authUser := dto.UserDto{
-			ID:       userID,
+			ID:       int(userID),
 			Password: password,
 		}
 

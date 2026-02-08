@@ -29,7 +29,7 @@ func (c *UdpClient) SendMessageUDP(req dto.SendMessageRequest) error {
 	defer conn.Close()
 
 	cmd := fmt.Sprintf(
-		"SEND MESSAGE %s:%s:%s:%s",
+		"SEND MESSAGE %d:%s:%d:%s",
 		req.Sender.ID,
 		req.Sender.Password,
 		req.ReceiverID,
