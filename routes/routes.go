@@ -28,10 +28,17 @@ func RegisterRoutes(r chi.Router) {
 		r.Post("/", handlers.SendMessageHandler(messageService))
 	})
 
-	r.Route("/auth", func(r chi.Router) {
+    r.Route("/auth", func(r chi.Router) {
 
-		r.Post("/login", handlers.LoginHandler(authService))
-	})
+	    r.Post("/login", handlers.LoginHandler(authService))
+
+	    r.Group(func(r chi.Router) {
+		    r.Use(handlers.AuthMiddleware)
+
+		    r.Get("/me", handlers.MeHandler(userService))
+	    })
+    })
+
 
 	r.Route("/ws", func(r chi.Router) {
 		r.Use(handlers.AuthMiddleware)

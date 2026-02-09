@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+
 	"github.com/golang-jwt/jwt/v5"
 	"main.go/dto"
 	"main.go/services"
@@ -34,6 +35,31 @@ func LoginHandler(svc services.AuthService) http.HandlerFunc {
 		}
 
 		http.SetCookie(w, cookie)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(currentUser)
+	}
+}
+
+func MeHandler(svc services.UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authUser, ok := r.Context().Value("authUser").(dto.UserDto)
+		if !ok {
+			http.Error(w, "Não autorizado", http.StatusUnauthorized)
+			return
+		}
+
+		users, err := svc.GetUsers(authUser)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		currentUser := services.GetUserFromUsers(authUser.ID, users)
+		if currentUser == nil {
+			return;
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
